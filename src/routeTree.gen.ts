@@ -16,6 +16,7 @@ import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as VendorsNewRouteImport } from './routes/vendors.new'
+import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as EventIdRouteImport } from './routes/event.$id'
 
 const VendorsRoute = VendorsRouteImport.update({
@@ -53,6 +54,11 @@ const VendorsNewRoute = VendorsNewRouteImport.update({
   path: '/new',
   getParentRoute: () => VendorsRoute,
 } as any)
+const InviteTokenRoute = InviteTokenRouteImport.update({
+  id: '/invite/$token',
+  path: '/invite/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EventIdRoute = EventIdRouteImport.update({
   id: '/event/$id',
   path: '/event/$id',
@@ -67,6 +73,7 @@ export interface FileRoutesByFullPath {
   '/join': typeof JoinRoute
   '/vendors': typeof VendorsRouteWithChildren
   '/event/$id': typeof EventIdRoute
+  '/invite/$token': typeof InviteTokenRoute
   '/vendors/new': typeof VendorsNewRoute
 }
 export interface FileRoutesByTo {
@@ -77,6 +84,7 @@ export interface FileRoutesByTo {
   '/join': typeof JoinRoute
   '/vendors': typeof VendorsRouteWithChildren
   '/event/$id': typeof EventIdRoute
+  '/invite/$token': typeof InviteTokenRoute
   '/vendors/new': typeof VendorsNewRoute
 }
 export interface FileRoutesById {
@@ -88,6 +96,7 @@ export interface FileRoutesById {
   '/join': typeof JoinRoute
   '/vendors': typeof VendorsRouteWithChildren
   '/event/$id': typeof EventIdRoute
+  '/invite/$token': typeof InviteTokenRoute
   '/vendors/new': typeof VendorsNewRoute
 }
 export interface FileRouteTypes {
@@ -100,6 +109,7 @@ export interface FileRouteTypes {
     | '/join'
     | '/vendors'
     | '/event/$id'
+    | '/invite/$token'
     | '/vendors/new'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -110,6 +120,7 @@ export interface FileRouteTypes {
     | '/join'
     | '/vendors'
     | '/event/$id'
+    | '/invite/$token'
     | '/vendors/new'
   id:
     | '__root__'
@@ -120,6 +131,7 @@ export interface FileRouteTypes {
     | '/join'
     | '/vendors'
     | '/event/$id'
+    | '/invite/$token'
     | '/vendors/new'
   fileRoutesById: FileRoutesById
 }
@@ -131,6 +143,7 @@ export interface RootRouteChildren {
   JoinRoute: typeof JoinRoute
   VendorsRoute: typeof VendorsRouteWithChildren
   EventIdRoute: typeof EventIdRoute
+  InviteTokenRoute: typeof InviteTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -184,6 +197,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VendorsNewRouteImport
       parentRoute: typeof VendorsRoute
     }
+    '/invite/$token': {
+      id: '/invite/$token'
+      path: '/invite/$token'
+      fullPath: '/invite/$token'
+      preLoaderRoute: typeof InviteTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/event/$id': {
       id: '/event/$id'
       path: '/event/$id'
@@ -213,6 +233,7 @@ const rootRouteChildren: RootRouteChildren = {
   JoinRoute: JoinRoute,
   VendorsRoute: VendorsRouteWithChildren,
   EventIdRoute: EventIdRoute,
+  InviteTokenRoute: InviteTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
