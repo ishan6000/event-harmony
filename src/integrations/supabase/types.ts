@@ -14,16 +14,239 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      event_functions: {
+        Row: {
+          created_at: string
+          description: string | null
+          event_id: string
+          id: string
+          location: string | null
+          starts_at: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          event_id: string
+          id?: string
+          location?: string | null
+          starts_at: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          event_id?: string
+          id?: string
+          location?: string | null
+          starts_at?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_functions_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_members: {
+        Row: {
+          event_id: string
+          id: string
+          joined_at: string
+          role: Database["public"]["Enums"]["member_role"]
+          user_id: string
+        }
+        Insert: {
+          event_id: string
+          id?: string
+          joined_at?: string
+          role?: Database["public"]["Enums"]["member_role"]
+          user_id: string
+        }
+        Update: {
+          event_id?: string
+          id?: string
+          joined_at?: string
+          role?: Database["public"]["Enums"]["member_role"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_members_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_photos: {
+        Row: {
+          caption: string | null
+          created_at: string
+          event_id: string
+          id: string
+          storage_path: string
+          uploader_id: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          event_id: string
+          id?: string
+          storage_path: string
+          uploader_id: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          event_id?: string
+          id?: string
+          storage_path?: string
+          uploader_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_photos_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          category: Database["public"]["Enums"]["event_category"]
+          created_at: string
+          description: string | null
+          event_date: string | null
+          host_id: string
+          id: string
+          location: string | null
+          share_code: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["event_category"]
+          created_at?: string
+          description?: string | null
+          event_date?: string | null
+          host_id: string
+          id?: string
+          location?: string | null
+          share_code: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["event_category"]
+          created_at?: string
+          description?: string | null
+          event_date?: string | null
+          host_id?: string
+          id?: string
+          location?: string | null
+          share_code?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      guests: {
+        Row: {
+          arrived_at: string | null
+          created_at: string
+          event_id: string
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          rsvp_status: string
+          side: string | null
+        }
+        Insert: {
+          arrived_at?: string | null
+          created_at?: string
+          event_id: string
+          id?: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          rsvp_status?: string
+          side?: string | null
+        }
+        Update: {
+          arrived_at?: string | null
+          created_at?: string
+          event_id?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          rsvp_status?: string
+          side?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "guests_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string | null
+          full_name: string | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_member_role: {
+        Args: { _event_id: string; _user_id: string }
+        Returns: Database["public"]["Enums"]["member_role"]
+      }
+      is_event_host: {
+        Args: { _event_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_event_member: {
+        Args: { _event_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      event_category: "wedding" | "college_fest" | "private_party" | "corporate"
+      member_role: "host" | "family" | "photographer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +373,9 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      event_category: ["wedding", "college_fest", "private_party", "corporate"],
+      member_role: ["host", "family", "photographer"],
+    },
   },
 } as const
