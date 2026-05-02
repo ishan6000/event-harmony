@@ -15,6 +15,7 @@ import { Route as ForgotCodeRouteImport } from './routes/forgot-code'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as VendorsNewRouteImport } from './routes/vendors.new'
 import { Route as EventIdRouteImport } from './routes/event.$id'
 
 const VendorsRoute = VendorsRouteImport.update({
@@ -47,6 +48,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const VendorsNewRoute = VendorsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => VendorsRoute,
+} as any)
 const EventIdRoute = EventIdRouteImport.update({
   id: '/event/$id',
   path: '/event/$id',
@@ -59,8 +65,9 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/forgot-code': typeof ForgotCodeRoute
   '/join': typeof JoinRoute
-  '/vendors': typeof VendorsRoute
+  '/vendors': typeof VendorsRouteWithChildren
   '/event/$id': typeof EventIdRoute
+  '/vendors/new': typeof VendorsNewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -68,8 +75,9 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/forgot-code': typeof ForgotCodeRoute
   '/join': typeof JoinRoute
-  '/vendors': typeof VendorsRoute
+  '/vendors': typeof VendorsRouteWithChildren
   '/event/$id': typeof EventIdRoute
+  '/vendors/new': typeof VendorsNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -78,8 +86,9 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/forgot-code': typeof ForgotCodeRoute
   '/join': typeof JoinRoute
-  '/vendors': typeof VendorsRoute
+  '/vendors': typeof VendorsRouteWithChildren
   '/event/$id': typeof EventIdRoute
+  '/vendors/new': typeof VendorsNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -91,6 +100,7 @@ export interface FileRouteTypes {
     | '/join'
     | '/vendors'
     | '/event/$id'
+    | '/vendors/new'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -100,6 +110,7 @@ export interface FileRouteTypes {
     | '/join'
     | '/vendors'
     | '/event/$id'
+    | '/vendors/new'
   id:
     | '__root__'
     | '/'
@@ -109,6 +120,7 @@ export interface FileRouteTypes {
     | '/join'
     | '/vendors'
     | '/event/$id'
+    | '/vendors/new'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -117,7 +129,7 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   ForgotCodeRoute: typeof ForgotCodeRoute
   JoinRoute: typeof JoinRoute
-  VendorsRoute: typeof VendorsRoute
+  VendorsRoute: typeof VendorsRouteWithChildren
   EventIdRoute: typeof EventIdRoute
 }
 
@@ -165,6 +177,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/vendors/new': {
+      id: '/vendors/new'
+      path: '/new'
+      fullPath: '/vendors/new'
+      preLoaderRoute: typeof VendorsNewRouteImport
+      parentRoute: typeof VendorsRoute
+    }
     '/event/$id': {
       id: '/event/$id'
       path: '/event/$id'
@@ -175,13 +194,24 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface VendorsRouteChildren {
+  VendorsNewRoute: typeof VendorsNewRoute
+}
+
+const VendorsRouteChildren: VendorsRouteChildren = {
+  VendorsNewRoute: VendorsNewRoute,
+}
+
+const VendorsRouteWithChildren =
+  VendorsRoute._addFileChildren(VendorsRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthRoute: AuthRoute,
   DashboardRoute: DashboardRoute,
   ForgotCodeRoute: ForgotCodeRoute,
   JoinRoute: JoinRoute,
-  VendorsRoute: VendorsRoute,
+  VendorsRoute: VendorsRouteWithChildren,
   EventIdRoute: EventIdRoute,
 }
 export const routeTree = rootRouteImport
