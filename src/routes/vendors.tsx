@@ -43,9 +43,8 @@ function VendorsList() {
   useEffect(() => {
     if (!user) return;
     (async () => {
-      let q = supabase.from("vendors").select("*").eq("is_active", true).order("created_at", { ascending: false });
-      if (cat !== "all") q = q.eq("category", cat as Vendor["category"]);
-      const { data } = await q;
+      const base = supabase.from("vendors").select("*").eq("is_active", true).order("created_at", { ascending: false });
+      const { data } = cat === "all" ? await base : await base.eq("category", cat as never);
       setVendors((data ?? []) as Vendor[]);
     })();
   }, [user, cat]);

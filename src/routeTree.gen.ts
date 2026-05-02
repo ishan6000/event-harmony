@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as VendorsRouteImport } from './routes/vendors'
 import { Route as JoinRouteImport } from './routes/join'
 import { Route as ForgotCodeRouteImport } from './routes/forgot-code'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -16,6 +17,11 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as EventIdRouteImport } from './routes/event.$id'
 
+const VendorsRoute = VendorsRouteImport.update({
+  id: '/vendors',
+  path: '/vendors',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const JoinRoute = JoinRouteImport.update({
   id: '/join',
   path: '/join',
@@ -53,6 +59,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/forgot-code': typeof ForgotCodeRoute
   '/join': typeof JoinRoute
+  '/vendors': typeof VendorsRoute
   '/event/$id': typeof EventIdRoute
 }
 export interface FileRoutesByTo {
@@ -61,6 +68,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/forgot-code': typeof ForgotCodeRoute
   '/join': typeof JoinRoute
+  '/vendors': typeof VendorsRoute
   '/event/$id': typeof EventIdRoute
 }
 export interface FileRoutesById {
@@ -70,6 +78,7 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/forgot-code': typeof ForgotCodeRoute
   '/join': typeof JoinRoute
+  '/vendors': typeof VendorsRoute
   '/event/$id': typeof EventIdRoute
 }
 export interface FileRouteTypes {
@@ -80,9 +89,17 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/forgot-code'
     | '/join'
+    | '/vendors'
     | '/event/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/dashboard' | '/forgot-code' | '/join' | '/event/$id'
+  to:
+    | '/'
+    | '/auth'
+    | '/dashboard'
+    | '/forgot-code'
+    | '/join'
+    | '/vendors'
+    | '/event/$id'
   id:
     | '__root__'
     | '/'
@@ -90,6 +107,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/forgot-code'
     | '/join'
+    | '/vendors'
     | '/event/$id'
   fileRoutesById: FileRoutesById
 }
@@ -99,11 +117,19 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   ForgotCodeRoute: typeof ForgotCodeRoute
   JoinRoute: typeof JoinRoute
+  VendorsRoute: typeof VendorsRoute
   EventIdRoute: typeof EventIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/vendors': {
+      id: '/vendors'
+      path: '/vendors'
+      fullPath: '/vendors'
+      preLoaderRoute: typeof VendorsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/join': {
       id: '/join'
       path: '/join'
@@ -155,6 +181,7 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   ForgotCodeRoute: ForgotCodeRoute,
   JoinRoute: JoinRoute,
+  VendorsRoute: VendorsRoute,
   EventIdRoute: EventIdRoute,
 }
 export const routeTree = rootRouteImport
