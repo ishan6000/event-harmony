@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Card } from "@/components/ui/card";
 import { categoryEmoji, categoryLabel } from "@/lib/event-helpers";
-import { Copy, Calendar, MapPin, Plus, Check, Clock, Trash2, Upload, Users } from "lucide-react";
+import { Copy, Calendar, MapPin, Plus, Check, Clock, Trash2, Upload, Users, Mail, Camera } from "lucide-react";
 
 export const Route = createFileRoute("/event/$id")({
   component: EventDetail,
@@ -104,7 +104,7 @@ function EventDetail() {
           <TabsContent value="timeline"><TimelineTab eventId={id} canEdit={isHost} /></TabsContent>
           <TabsContent value="guests"><GuestsTab eventId={id} canEdit={canManageGuests} canDelete={isHost} /></TabsContent>
           <TabsContent value="photos"><PhotosTab eventId={id} userId={user.id} canUpload={canUpload} isHost={isHost} /></TabsContent>
-          <TabsContent value="members"><MembersTab eventId={id} hostId={event.host_id} /></TabsContent>
+          <TabsContent value="members"><MembersTab eventId={id} hostId={event.host_id} isHost={isHost} /></TabsContent>
         </Tabs>
       </div>
     </div>
