@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plus, Copy, Calendar, MapPin } from "lucide-react";
+import { Plus, Copy, Calendar, MapPin, Sparkles } from "lucide-react";
 import { EVENT_CATEGORIES, generateShareCode, categoryEmoji, categoryLabel, type EventCategoryValue } from "@/lib/event-helpers";
 
 export const Route = createFileRoute("/dashboard")({
@@ -92,16 +92,19 @@ function Dashboard() {
     <div className="min-h-screen bg-secondary/20">
       <Header />
       <div className="container mx-auto px-4 py-10">
-        <div className="flex flex-wrap items-end justify-between gap-4">
+        <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
           <div>
-            <h1 className="font-serif text-4xl font-semibold text-foreground">Your events</h1>
+            <h1 className="font-serif text-3xl font-semibold text-foreground md:text-4xl">Your events</h1>
             <p className="mt-1 text-muted-foreground">All events you host or have been invited to.</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button variant="outline" asChild><Link to="/join">Join with code</Link></Button>
-            <Dialog open={open} onOpenChange={setOpen}>
-              <DialogTrigger asChild><Button variant="hero"><Plus className="h-4 w-4" /> New event</Button></DialogTrigger>
-              <DialogContent>
+            <Button variant="hero" onClick={() => setOpen(true)}><Plus className="h-4 w-4" /> New event</Button>
+          </div>
+        </div>
+
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogContent className="max-h-[90vh] overflow-y-auto">
                 <DialogHeader><DialogTitle className="font-serif text-2xl">Create your event</DialogTitle></DialogHeader>
                 <form onSubmit={createEvent} className="space-y-4">
                   <div>
@@ -125,8 +128,6 @@ function Dashboard() {
                 </form>
               </DialogContent>
             </Dialog>
-          </div>
-        </div>
 
         <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
           {loadingEvents ? (
@@ -136,6 +137,9 @@ function Dashboard() {
               <div className="text-5xl">🎊</div>
               <h3 className="mt-4 font-serif text-2xl">No events yet</h3>
               <p className="mt-2 text-muted-foreground">Create your first event to get started.</p>
+              <Button variant="hero" className="mt-6" onClick={() => setOpen(true)}>
+                <Sparkles className="h-4 w-4" /> Create event
+              </Button>
             </CardContent></Card>
           ) : events.map((ev) => {
             const isHost = ev.host_id === user.id;
