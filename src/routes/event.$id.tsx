@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Card } from "@/components/ui/card";
 import { categoryEmoji, categoryLabel } from "@/lib/event-helpers";
-import { Copy, Calendar, MapPin, Plus, Check, Clock, Trash2, Upload, Users } from "lucide-react";
+import { Copy, Calendar, MapPin, Plus, Check, Clock, Trash2, Upload, Users, Mail, Camera } from "lucide-react";
 
 export const Route = createFileRoute("/event/$id")({
   component: EventDetail,
@@ -104,7 +104,7 @@ function EventDetail() {
           <TabsContent value="timeline"><TimelineTab eventId={id} canEdit={isHost} /></TabsContent>
           <TabsContent value="guests"><GuestsTab eventId={id} canEdit={canManageGuests} canDelete={isHost} /></TabsContent>
           <TabsContent value="photos"><PhotosTab eventId={id} userId={user.id} canUpload={canUpload} isHost={isHost} /></TabsContent>
-          <TabsContent value="members"><MembersTab eventId={id} hostId={event.host_id} /></TabsContent>
+          <TabsContent value="members"><MembersTab eventId={id} hostId={event.host_id} isHost={isHost} /></TabsContent>
         </Tabs>
       </div>
     </div>
@@ -352,31 +352,131 @@ function PhotosTab({ eventId, userId, canUpload, isHost }: { eventId: string; us
   );
 }
 
-/* ---------- Members ---------- */
-function MembersTab({ eventId, hostId }: { eventId: string; hostId: string }) {
+/* ---------- Members + Invites ---------- */
+function MembersTab({ eventId, hostId, isHost }: { eventId: string; hostId: string; isHost: boolean }) {
   const [members, setMembers] = useState<any[]>([]);
-  useEffect(() => {
-    (async () => {
-      const { data: m } = await supabase.from("event_members").select("*").eq("event_id", eventId);
-      if (!m) return;
+  const [invites, setInvites] = useState<any[]>([]);
+  const [open, setOpen] = useState(false);
+  const [form, setForm] = useState({ email: "", role: "photographer" as "photographer" | "family" });
+  const [busy, setBusy] = useState(false);
+
+  const load = async () => {
+    const { data: m } = await supabase.from("event_members").select("*").eq("event_id", eventId);
+    if (m) {
       const ids = m.map((x: any) => x.user_id);
       const { data: profiles } = await supabase.from("profiles").select("id, full_name, email").in("id", ids);
-      const merged = m.map((x: any) => ({ ...x, profile: profiles?.find((p: any) => p.id === x.user_id) }));
-      setMembers(merged);
-    })();
-  }, [eventId]);
+      setMembers(m.map((x: any) => ({ ...x, profile: profiles?.find((p: any) => p.id === x.user_id) })));
+    }
+    if (isHost) {
+      const { data: inv } = await supabase.from("event_invitations").select("*").eq("event_id", eventId).order("created_at", { ascending: false });
+      setInvites(inv ?? []);
+    }
+  };
+  useEffect(() => { load(); /* eslint-disable-next-line */ }, [eventId, isHost]);
+
+  const sendInvite = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const parsed = z.object({ email: z.string().trim().email(), role: z.enum(["photographer", "family"]) }).safeParse(form);
+    if (!parsed.success) return toast.error("Enter a valid email");
+    setBusy(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) { setBusy(false); return; }
+    const { data, error } = await supabase.from("event_invitations").insert({
+      event_id: eventId,
+      invited_email: parsed.data.email.toLowerCase(),
+      role: parsed.data.role,
+      invited_by: user.id,
+    }).select("token").single();
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    const link = `${window.location.origin}/invite/${data.token}`;
+    await navigator.clipboard.writeText(link);
+    toast.success("Invite created — link copied to clipboard!");
+    setOpen(false);
+    setForm({ email: "", role: "photographer" });
+    load();
+  };
+
+  const copyInvite = (token: string) => {
+    const link = `${window.location.origin}/invite/${token}`;
+    navigator.clipboard.writeText(link);
+    toast.success("Invite link copied");
+  };
+
+  const removeInvite = async (id: string) => {
+    const { error } = await supabase.from("event_invitations").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    load();
+  };
 
   return (
-    <div className="mt-6 grid gap-3 md:grid-cols-2">
-      {members.map((m) => (
-        <Card key={m.id} className="flex items-center justify-between p-4">
-          <div>
-            <div className="font-semibold">{m.profile?.full_name || m.profile?.email || "Member"}</div>
-            <div className="text-xs text-muted-foreground">{m.profile?.email}</div>
+    <div className="mt-6 space-y-8">
+      {isHost && (
+        <div>
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="font-serif text-xl font-semibold">Invite by email</h3>
+            <Dialog open={open} onOpenChange={setOpen}>
+              <DialogTrigger asChild><Button variant="hero" size="sm"><Mail className="h-4 w-4" /> New invite</Button></DialogTrigger>
+              <DialogContent>
+                <DialogHeader><DialogTitle className="font-serif text-2xl">Invite someone</DialogTitle></DialogHeader>
+                <form onSubmit={sendInvite} className="space-y-3">
+                  <div><Label>Email</Label><Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} required placeholder="photographer@studio.com" /></div>
+                  <div>
+                    <Label>Role</Label>
+                    <div className="mt-2 grid grid-cols-2 gap-2">
+                      <button type="button" onClick={() => setForm({ ...form, role: "photographer" })} className={`rounded-lg border-2 p-3 text-left transition ${form.role === "photographer" ? "border-primary bg-primary/5" : "border-border"}`}>
+                        <Camera className="h-4 w-4" /><div className="mt-1 font-medium">Photographer</div><div className="text-xs text-muted-foreground">Can upload photos</div>
+                      </button>
+                      <button type="button" onClick={() => setForm({ ...form, role: "family" })} className={`rounded-lg border-2 p-3 text-left transition ${form.role === "family" ? "border-primary bg-primary/5" : "border-border"}`}>
+                        <Users className="h-4 w-4" /><div className="mt-1 font-medium">Family</div><div className="text-xs text-muted-foreground">Can manage guests</div>
+                      </button>
+                    </div>
+                  </div>
+                  <p className="rounded-md bg-secondary/60 p-3 text-xs text-muted-foreground">After creating, an invite link is copied to your clipboard. Share it with them — they'll sign in with the same email to accept.</p>
+                  <Button type="submit" variant="hero" className="w-full" disabled={busy}>{busy ? "Creating…" : "Create invite link"}</Button>
+                </form>
+              </DialogContent>
+            </Dialog>
           </div>
-          <span className={`rounded-full px-3 py-1 text-xs font-semibold ${m.user_id === hostId ? "gradient-gold text-foreground" : "bg-secondary text-secondary-foreground"}`}>{m.role}</span>
-        </Card>
-      ))}
+          {invites.length > 0 && (
+            <div className="grid gap-2 md:grid-cols-2">
+              {invites.map((inv) => (
+                <Card key={inv.id} className="flex items-center justify-between p-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="truncate text-sm font-medium">{inv.invited_email}</div>
+                    <div className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
+                      <span className="capitalize">{inv.role}</span>
+                      <span>·</span>
+                      <span className={inv.used_at ? "text-primary" : "text-amber-600"}>
+                        {inv.used_at ? "Accepted" : "Pending"}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex gap-1">
+                    {!inv.used_at && <Button size="icon" variant="ghost" onClick={() => copyInvite(inv.token)}><Copy className="h-3.5 w-3.5" /></Button>}
+                    <Button size="icon" variant="ghost" onClick={() => removeInvite(inv.id)}><Trash2 className="h-3.5 w-3.5 text-destructive" /></Button>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      <div>
+        <h3 className="mb-4 font-serif text-xl font-semibold">Members ({members.length})</h3>
+        <div className="grid gap-3 md:grid-cols-2">
+          {members.map((m) => (
+            <Card key={m.id} className="flex items-center justify-between p-4">
+              <div>
+                <div className="font-semibold">{m.profile?.full_name || m.profile?.email || "Member"}</div>
+                <div className="text-xs text-muted-foreground">{m.profile?.email}</div>
+              </div>
+              <span className={`rounded-full px-3 py-1 text-xs font-semibold capitalize ${m.user_id === hostId ? "gradient-gold text-foreground" : "bg-secondary text-secondary-foreground"}`}>{m.role}</span>
+            </Card>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

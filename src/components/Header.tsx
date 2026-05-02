@@ -1,7 +1,8 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Sparkles, LogOut } from "lucide-react";
+import { Sparkles, LogOut, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth-context";
+import { NotificationsBell } from "@/components/NotificationsBell";
 
 export function Header() {
   const { user, signOut } = useAuth();
@@ -16,11 +17,12 @@ export function Header() {
           </div>
           <span className="font-serif text-xl font-semibold text-primary">EventCircle</span>
         </Link>
-        <nav className="flex items-center gap-2">
+        <nav className="flex items-center gap-1 sm:gap-2">
           {user ? (
             <>
-              <Button variant="ghost" asChild><Link to="/dashboard">Dashboard</Link></Button>
-              <Button variant="ghost" asChild><Link to="/join">Join with code</Link></Button>
+              <Button variant="ghost" asChild className="hidden sm:inline-flex"><Link to="/dashboard">Dashboard</Link></Button>
+              <Button variant="ghost" asChild className="hidden sm:inline-flex"><Link to="/vendors"><Store className="h-4 w-4" />Vendors</Link></Button>
+              <NotificationsBell />
               <Button variant="outline" size="sm" onClick={async () => { await signOut(); navigate({ to: "/" }); }}>
                 <LogOut className="h-4 w-4" /> Sign out
               </Button>
