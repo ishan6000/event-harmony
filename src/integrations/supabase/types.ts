@@ -52,6 +52,50 @@ export type Database = {
           },
         ]
       }
+      event_invitations: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          invited_by: string
+          invited_email: string
+          role: Database["public"]["Enums"]["member_role"]
+          token: string
+          used_at: string | null
+          used_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          invited_by: string
+          invited_email: string
+          role?: Database["public"]["Enums"]["member_role"]
+          token?: string
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          invited_by?: string
+          invited_email?: string
+          role?: Database["public"]["Enums"]["member_role"]
+          token?: string
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_invitations_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       event_members: {
         Row: {
           event_id: string
@@ -202,6 +246,50 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          body: string | null
+          created_at: string
+          event_id: string | null
+          id: string
+          link: string | null
+          read_at: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          event_id?: string | null
+          id?: string
+          link?: string | null
+          read_at?: string | null
+          title: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          event_id?: string | null
+          id?: string
+          link?: string | null
+          read_at?: string | null
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -226,6 +314,54 @@ export type Database = {
         }
         Relationships: []
       }
+      vendors: {
+        Row: {
+          business_name: string
+          category: Database["public"]["Enums"]["vendor_category"]
+          city: string | null
+          cover_path: string | null
+          created_at: string
+          description: string | null
+          email: string | null
+          id: string
+          is_active: boolean
+          owner_id: string
+          phone: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          business_name: string
+          category: Database["public"]["Enums"]["vendor_category"]
+          city?: string | null
+          cover_path?: string | null
+          created_at?: string
+          description?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          owner_id: string
+          phone?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          business_name?: string
+          category?: Database["public"]["Enums"]["vendor_category"]
+          city?: string | null
+          cover_path?: string | null
+          created_at?: string
+          description?: string | null
+          email?: string | null
+          id?: string
+          is_active?: boolean
+          owner_id?: string
+          phone?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -247,6 +383,15 @@ export type Database = {
     Enums: {
       event_category: "wedding" | "college_fest" | "private_party" | "corporate"
       member_role: "host" | "family" | "photographer"
+      vendor_category:
+        | "photography"
+        | "catering"
+        | "decor"
+        | "music"
+        | "makeup"
+        | "venue"
+        | "planner"
+        | "other"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -376,6 +521,16 @@ export const Constants = {
     Enums: {
       event_category: ["wedding", "college_fest", "private_party", "corporate"],
       member_role: ["host", "family", "photographer"],
+      vendor_category: [
+        "photography",
+        "catering",
+        "decor",
+        "music",
+        "makeup",
+        "venue",
+        "planner",
+        "other",
+      ],
     },
   },
 } as const
