@@ -20,17 +20,35 @@ export function Header() {
         <nav className="flex items-center gap-1 sm:gap-2">
           {user ? (
             <>
-              <Button variant="ghost" asChild className="hidden sm:inline-flex"><Link to="/dashboard">Dashboard</Link></Button>
-              <Button variant="ghost" asChild className="hidden sm:inline-flex"><Link to="/vendors"><Store className="h-4 w-4" />Vendors</Link></Button>
+              <Button variant="ghost" asChild className="hidden sm:inline-flex">
+                <Link to="/dashboard">Dashboard</Link>
+              </Button>
+              <Button variant="ghost" asChild className="hidden sm:inline-flex">
+                <Link to="/vendors">
+                  <Store className="h-4 w-4" />
+                  Vendors
+                </Link>
+              </Button>
               <NotificationsBell />
-              <Button variant="outline" size="sm" onClick={async () => { await signOut(); navigate({ to: "/" }); }}>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={async () => {
+                  await signOut();
+                  navigate({ to: "/" });
+                }}
+              >
                 <LogOut className="h-4 w-4" /> Sign out
               </Button>
             </>
           ) : (
             <>
-              <Button variant="ghost" asChild><Link to="/auth">Sign in</Link></Button>
-              <Button variant="hero" asChild><Link to="/auth">Get started</Link></Button>
+              <Button variant="ghost" asChild>
+                <Link to="/auth">Sign in</Link>
+              </Button>
+              <Button variant="hero" asChild>
+                <Link to="/auth">Get started</Link>
+              </Button>
             </>
           )}
         </nav>

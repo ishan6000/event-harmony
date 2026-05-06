@@ -36,9 +36,20 @@ export function NotificationsBell() {
     load();
     const ch = supabase
       .channel("notif-" + user.id)
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${user.id}` }, () => load())
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "notifications",
+          filter: `user_id=eq.${user.id}`,
+        },
+        () => load(),
+      )
       .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    return () => {
+      supabase.removeChannel(ch);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id]);
 
@@ -46,12 +57,19 @@ export function NotificationsBell() {
   const unread = items.filter((n) => !n.read_at).length;
 
   const markAllRead = async () => {
-    await supabase.from("notifications").update({ read_at: new Date().toISOString() }).is("read_at", null);
+    await supabase
+      .from("notifications")
+      .update({ read_at: new Date().toISOString() })
+      .is("read_at", null);
     load();
   };
 
   const click = async (n: Notif) => {
-    if (!n.read_at) await supabase.from("notifications").update({ read_at: new Date().toISOString() }).eq("id", n.id);
+    if (!n.read_at)
+      await supabase
+        .from("notifications")
+        .update({ read_at: new Date().toISOString() })
+        .eq("id", n.id);
     setOpen(false);
     if (n.link) navigate({ to: n.link });
     load();
@@ -73,14 +91,19 @@ export function NotificationsBell() {
         <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
           <h4 className="font-semibold">Notifications</h4>
           {unread > 0 && (
-            <button onClick={markAllRead} className="flex items-center gap-1 text-xs text-primary hover:underline">
+            <button
+              onClick={markAllRead}
+              className="flex items-center gap-1 text-xs text-primary hover:underline"
+            >
               <Check className="h-3 w-3" /> Mark all read
             </button>
           )}
         </div>
         <div className="max-h-96 overflow-y-auto">
           {items.length === 0 ? (
-            <p className="px-4 py-8 text-center text-sm text-muted-foreground">No notifications yet</p>
+            <p className="px-4 py-8 text-center text-sm text-muted-foreground">
+              No notifications yet
+            </p>
           ) : (
             items.map((n) => (
               <button
@@ -89,11 +112,18 @@ export function NotificationsBell() {
                 className={`block w-full border-b border-border/50 px-4 py-3 text-left transition-colors hover:bg-secondary/60 ${!n.read_at ? "bg-primary/5" : ""}`}
               >
                 <div className="flex items-start gap-2">
-                  {!n.read_at && <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />}
+                  {!n.read_at && (
+                    <span className="mt-1.5 h-2 w-2 shrink-0 rounded-full bg-primary" />
+                  )}
                   <div className="flex-1">
                     <p className="text-sm font-medium leading-snug">{n.title}</p>
                     {n.body && <p className="mt-0.5 text-xs text-muted-foreground">{n.body}</p>}
-                    <p className="mt-1 text-[10px] text-muted-foreground">{new Date(n.created_at).toLocaleString([], { dateStyle: "short", timeStyle: "short" })}</p>
+                    <p className="mt-1 text-[10px] text-muted-foreground">
+                      {new Date(n.created_at).toLocaleString([], {
+                        dateStyle: "short",
+                        timeStyle: "short",
+                      })}
+                    </p>
                   </div>
                 </div>
               </button>
